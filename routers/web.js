@@ -11,36 +11,8 @@ const bcrypt = require('bcryptjs');
 const sendEmail = require('../lib/sendEmail')
 const utils = require('../lib/utils')
 const uuid = require('uuid')
+const convert = require('koa-convert')
 //仅为测试使用。///////////////////////////////////
-router.get('/',function*(next){
-    this.body = '通过验证！'
-
-})
-router.get('/login',function*(next){
-
-    if(this.isAuthenticated()){
-        console.log('isAuthenticated')
-        this.redirect('/web/')
-    }else{
-        console.log(' !isAuthenticated','...')
-        this.body = yield render('login')
-    }
-
-})
-
-router.post('/login',function *(next){
-    let ctx = this
-    yield passport.authenticate('local', function(err, user, info, status) {
-        if (!user) {
-            ctx.body = { success: false }
-            ctx.throw(401)
-        } else {
-            ctx.login(user)
-            console.log('loginuser',user)
-            return ctx.redirect('back')
-        }
-    })(ctx, next)
-})
 
 router.get('/register',function *(next){
     this.body = yield render('register')
@@ -127,4 +99,6 @@ router.post('/setPassword',function *(){
     this.body = user
 
 })
-module.exports = router
+module.exports = function(app){
+    app.use(convert(router.routes())).use(convert(router.allowedMethods()))
+}

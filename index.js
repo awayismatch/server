@@ -1,10 +1,10 @@
 
 const Koa = require('koa');
 const serve = require('koa-static');
-const convert = require('koa-convert')
+
 const mount = require('koa-mount')
 const app = new Koa()
-const webRouter = require('./routers/web')
+
 
 
 require('koa-validate')(app)
@@ -15,16 +15,14 @@ app.use(bodyParser())
 app.keys = ['awayismatch'];
 
 
-//对web端使用session及passport
+//对web端
 let webMountPoint = new Koa()
-// 使用passport+session进入验证
-require('./webAuth')(webMountPoint)
-webMountPoint.use(convert(webRouter.routes())).use(convert(webRouter.allowedMethods()))
+require('./routers/web')(webMountPoint)
 app.use(mount('/web',webMountPoint))
+
 //api
-const apiRouter = require('./routers/api')
 let apiMountPoint = new Koa()
-apiMountPoint.use(convert(apiRouter.routes())).use(convert(apiRouter.allowedMethods()))
+require('./routers/api')(apiMountPoint)
 app.use(mount('/api',apiMountPoint))
 //静态文件
 let staticMountPoint = new Koa()
