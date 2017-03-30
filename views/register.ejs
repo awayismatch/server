@@ -8,11 +8,21 @@
     <title>Document</title>
 </head>
 <body>
-<form action="/register" method="post">
-    <input type="email" name="email" value="">
-    <input type="password" name="password" value="" >
+<form action="/web/register" method="post" onsubmit="return check()">
+    <input type="email" name="email" value="" id="email">
     <input type="submit" value="确定">
 </form>
-
+<script>
+    function check(){
+       var email = document.getElementById('email').value
+        if(validateEmail(email))return true
+        alert('邮件格式不正确')
+        return false
+    }
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+</script>
 </body>
 </html>

@@ -3,17 +3,21 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('user', {
+module.exports =  sequelize.define('registrationCode', {
     email: {
         type: Sequelize.STRING,
-        unique:true,
         allowNull:false,
         // field: 'first_name' // Will result in an attribute that is firstName when user facing but first_name in the database
     },
-    password: {
+    code: {
         type: Sequelize.STRING,
         allowNull:false,
-    }
+    },
+    activated: {
+        type: Sequelize.BOOLEAN,
+        allowNull:false,
+        defaultValue:false
+    },
 }, {
     freezeTableName: true // Model tableName will be the same as the model name
 });

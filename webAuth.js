@@ -1,9 +1,12 @@
 /**
  * Created by awayisblue on 2017/3/17.
  */
-const passport = require('koa-passport')
+const KoaPassport = require('koa-passport').KoaPassport
 const User = require ('./models/User')
 const bcrypt = require('bcryptjs')
+const session = require('koa-generic-session')
+const redisStore = require('koa-redis')
+const convert = require('koa-convert')
 const fetchUser = (email) => {
     // This is an example! Use password hashing in your
     // const user = { id: 1, username: 'test', password: 'test' }
@@ -15,6 +18,8 @@ const fetchUser = (email) => {
     })
 }
 
+let passport = new KoaPassport()
+//serialize信息（email）存在session中，当某个cookie访问时，会跟据email deserialize得到用户，直接通过request.user得到。
 passport.serializeUser(function(user, done) {
     done(null, user.email)
 })
@@ -42,3 +47,10 @@ passport.use(new LocalStrategy({usernameField:'email',passwordField:'password'},
         })
         .catch(err => done(err))
 }))
+module.exports = function(web){
+    web.use(convert(session({
+        store: redisStore()
+    })));
+    web.use(passport.initialize())
+    web.use(passport.session())
+}

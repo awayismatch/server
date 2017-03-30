@@ -1,5 +1,5 @@
 {
-  "name": "koa-demo",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -39,6 +39,7 @@
     "nodemailer": "^3.1.7",
     "passport-local": "^1.0.0",
     "save-to": "^1.0.3",
-    "sequelize": "^3.30.2"
+    "sequelize": "^3.30.2",
+    "uuid": "^3.0.1"
   }
 }
