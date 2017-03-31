@@ -5,8 +5,8 @@
 const router = require('koa-router')();
 const render = require('../lib/render')
 const passport = require('koa-passport')
-const User = require ('../models/User')
-const RegistrationCode = require ('../models/RegistrationCode')
+const Users = require ('../models/Users')
+const RegistrationCodes = require ('../models/RegistrationCodes')
 const bcrypt = require('bcryptjs');
 const sendEmail = require('../lib/sendEmail')
 const utils = require('../lib/utils')
@@ -40,9 +40,9 @@ function registerRoutes(router){
             return this.throw('发送邮件出错',500)
         }
         let ctx = this
-        yield RegistrationCode.sync({force:true}).then(function () {
+        yield RegistrationCodes.sync({force:true}).then(function () {
             // Table created
-            return RegistrationCode.create({
+            return RegistrationCodes.create({
                 email: email,
                 code:code
             });
@@ -59,7 +59,7 @@ function registerRoutes(router){
         let query = this.query
         let code = query.code
 
-        let target = yield RegistrationCode.findOne({
+        let target = yield RegistrationCodes.findOne({
             where:{
                 code:code,
                 activated:0,
@@ -74,7 +74,7 @@ function registerRoutes(router){
     router.post('/setPassword',function *(){
         let query = this.query
         let code = query.code
-        let target = yield RegistrationCode.findOne({
+        let target = yield RegistrationCodes.findOne({
             where:{
                 code:code,
                 activated:0,
@@ -90,8 +90,8 @@ function registerRoutes(router){
 
         var salt = bcrypt.genSaltSync(10);
         var hash = bcrypt.hashSync(password, salt);
-        let user = yield User.sync({force:true}).then(function(){
-            return User.create({
+        let user = yield Users.sync({force:true}).then(function(){
+            return Users.create({
                 email: target.email,
                 password:hash
             })

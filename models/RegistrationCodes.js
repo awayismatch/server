@@ -3,7 +3,7 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('registrationCode', {
+module.exports =  sequelize.define('registrationCodes', {
     email: {
         type: Sequelize.STRING,
         allowNull:false,
