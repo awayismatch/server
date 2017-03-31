@@ -5,7 +5,7 @@
 const router = require('koa-router')();
 const render = require('../lib/render')
 const passport = require('koa-passport')
-const User = require ('../models/User')
+const Users = require ('../models/Users')
 const bcrypt = require('bcryptjs');
 const config = require('../config')
 const jwt = require('jsonwebtoken');
@@ -21,7 +21,7 @@ function registerRoutes(router){
         let body = this.request.body
 
         let password = body.password,email = body.email
-        let user = yield User.findOne({
+        let user = yield Users.findOne({
             where:{
                 email:email
             },
@@ -36,16 +36,17 @@ function registerRoutes(router){
 
     })
     router.get('/post',function*(next){
-
         this.body = this.state.user
-
+    })
+    router.put('/profiles',function*(next){
+        this.body = this.state.user
     })
 }
 
 
 module.exports = function(app){
 
-    app.use(koaJwt({secret:config.api.jwtSecret}).unless({path:['/login']}))
+    app.use(koaJwt({secret:config.api.jwtSecret}).unless({path:[/\/login/]}))
     registerRoutes(router)
     app.use(convert(router.routes())).use(convert(router.allowedMethods()))
 }
