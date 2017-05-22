@@ -26,7 +26,7 @@ module.exports =  sequelize.define('profile', {
         allowNull:false,
     },
     birthday: {
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         allowNull:false,
     },
     email: {
