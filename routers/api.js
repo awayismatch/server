@@ -5,7 +5,8 @@
 const router = require('koa-router')();
 const render = require('../lib/render')
 const passport = require('koa-passport')
-const Users = require ('../models/Users')
+const Users = require ('../models/User')
+const Profiles = require ('../models/Profiles')
 const bcrypt = require('bcryptjs');
 const config = require('../config')
 const jwt = require('jsonwebtoken');
@@ -38,9 +39,13 @@ function registerRoutes(router){
     router.get('/post',function*(next){
         this.body = this.state.user
     })
+    router.get('/profiles',function*(next){
+        this.body = this.state.user
+    })
     router.put('/profiles',function*(next){
         this.body = this.state.user
     })
+
 }
 
 

@@ -3,19 +3,21 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('msgReceivers', {
+module.exports =  sequelize.define('crMessageReceiveCursor', {
+    chatRoomId: {
+        type: Sequelize.INTEGER(11),
+        allowNull:false,
+    },
+    latestMessageId: {
+        type: Sequelize.INTEGER(11),
+        allowNull:false,
+    },
     userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
-    messageId: {
-        type: Sequelize.INTEGER(11),
-        allowNull:false,
-    },
-    status:{
-        type:Sequelize.ENUM('未接收','已接收')
-    },
 }, {
-    freezeTableName: true // Model tableName will be the same as the model name
+    freezeTableName: true,
+    tableName: 'crMessageReceiveCursors',
 });
 

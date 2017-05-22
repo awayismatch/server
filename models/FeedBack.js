@@ -3,16 +3,18 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('matchSubscribers', {
+module.exports =  sequelize.define('feedBack', {
     userId: {
         type: Sequelize.INTEGER(11),
+        unique:true,
         allowNull:false,
     },
-    matchId: {
-        type: Sequelize.INTEGER(11),
+    content: {
+        type: Sequelize.STRING(255),
         allowNull:false,
-    },
+    }
 }, {
-    freezeTableName: true // Model tableName will be the same as the model name
+    freezeTableName: true,
+    tableName: 'feedBacks',
 });
 

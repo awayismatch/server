@@ -5,7 +5,7 @@
 const router = require('koa-router')();
 const render = require('../lib/render')
 const passport = require('koa-passport')
-const Users = require ('../models/Users')
+const Users = require ('../models/User')
 const RegistrationCodes = require ('../models/RegistrationCodes')
 const bcrypt = require('bcryptjs');
 const sendEmail = require('../lib/sendEmail')

@@ -3,22 +3,21 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('contacts', {
+module.exports =  sequelize.define('report', {
     userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
-    contactUserId: {
+    reportedUserId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
-    remark:{
-        type:Sequelize.STRING(30)
-    },
-    note:{
-        type:Sequelize.STRING
+    content: {
+        type: Sequelize.STRING(255),
+        allowNull:false,
     },
 }, {
-    freezeTableName: true // Model tableName will be the same as the model name
+    freezeTableName: true,
+    tableName: 'reports',
 });
 

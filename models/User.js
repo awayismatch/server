@@ -4,17 +4,17 @@
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
 module.exports =  sequelize.define('user', {
-    email: {
-        type: Sequelize.STRING,
+    phone: {
+        type: Sequelize.STRING(20),
         unique:true,
         allowNull:false,
-        // field: 'first_name' // Will result in an attribute that is firstName when user facing but first_name in the database
     },
     password: {
         type: Sequelize.STRING,
         allowNull:false,
     }
 }, {
-    freezeTableName: true // Model tableName will be the same as the model name
+    freezeTableName: true,
+    tableName: 'users',
 });
 

@@ -3,16 +3,19 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('blacklists', {
-    userId: {
+module.exports =  sequelize.define('crDisplayItem', {
+    chatRoomId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
-    targetUserId: {
-        type: Sequelize.INTEGER(11),
+    priority: {
+        type: Sequelize.INTEGER(11).UNSIGNED,
         allowNull:false,
-    }
+        defaultValue:0
+    },
+
 }, {
-    freezeTableName: true // Model tableName will be the same as the model name
+    freezeTableName: true,
+    tableName: 'crDisplayItems',
 });
 
