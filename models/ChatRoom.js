@@ -6,14 +6,13 @@ const Sequelize = require('sequelize')
 module.exports =  sequelize.define('chatRoom', {
     createrUserId: {
         type: Sequelize.INTEGER(11),
-        unique:true,
         allowNull:false,
     },
     topic: {
         type: Sequelize.STRING(60),
         allowNull:false,
     },
-    genderPlay: {
+    genderPlan: {
         type: Sequelize.ENUM('all','plan'),
         allowNull:false,
         defaultValue:'all'
@@ -21,10 +20,9 @@ module.exports =  sequelize.define('chatRoom', {
     totalAmount: {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull:false,
-        defaultValue:0
     },
     femaleAmount: {
-    type: Sequelize.INTEGER.UNSIGNED,
+        type: Sequelize.INTEGER.UNSIGNED,
         allowNull:false,
         defaultValue:0
     },

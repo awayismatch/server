@@ -24,7 +24,7 @@ app.use(mount('/web',webMountPoint))
 let apiMountPoint = new Koa()
 require('./routers/api')(apiMountPoint)
 app.use(mount('/api',apiMountPoint))
-//静态文件S
+//静态文件
 let staticMountPoint = new Koa()
 staticMountPoint.use(serve(__dirname + '/static',{maxage:365*24*60*60}));
 app.use(mount('/static',staticMountPoint))

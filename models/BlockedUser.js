@@ -12,6 +12,11 @@ module.exports =  sequelize.define('blockedUser', {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
+    block: {
+        type: Sequelize.ENUM('open','close'),
+        allowNull:false,
+        defaultValue:'open'
+    },
 }, {
     freezeTableName: true,
     tableName: 'blockedUsers',

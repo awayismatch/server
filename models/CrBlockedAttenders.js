@@ -3,26 +3,26 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('crBlockedUser', {
+module.exports =  sequelize.define('crBlockedAttender', {
     chatRoomId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
-    userId: {
+    attenderId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
-    blockedUserId: {
+    blockedAttenderId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
     block: {
         type: Sequelize.ENUM('open','close'),
         allowNull:false,
-        defaultValue:'close'
+        defaultValue:'open'
     },
 }, {
     freezeTableName: true,
-    tableName: 'crBlockedUsers',
+    tableName: 'crBlockedAttenders',
 });
 
