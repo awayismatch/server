@@ -8,11 +8,11 @@ module.exports =  sequelize.define('crBlockedAttender', {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
-    attenderId: {
+    userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },
-    blockedAttenderId: {
+    blockedUserId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },

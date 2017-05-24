@@ -3,10 +3,15 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('blockedUser', {
+const User = require('./User')
+let BlockedUser =  sequelize.define('blockedUser', {
     userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
+        references: {
+            model: User,
+            key:   "id"
+        }
     },
     blockedUserId: {
         type: Sequelize.INTEGER(11),
@@ -21,4 +26,8 @@ module.exports =  sequelize.define('blockedUser', {
     freezeTableName: true,
     tableName: 'blockedUsers',
 });
+module.exports = BlockedUser
 
+
+User.hasMany(BlockedUser)
+BlockedUser.belongsTo(User)

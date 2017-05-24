@@ -4,7 +4,7 @@
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
 module.exports =  sequelize.define('chatRoom', {
-    createrUserId: {
+    userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
     },

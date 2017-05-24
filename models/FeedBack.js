@@ -6,7 +6,6 @@ const Sequelize = require('sequelize')
 module.exports =  sequelize.define('feedBack', {
     userId: {
         type: Sequelize.INTEGER(11),
-        unique:true,
         allowNull:false,
     },
     content: {

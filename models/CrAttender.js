@@ -3,11 +3,17 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('crAttender', {
+const ChatRoom = require('./ChatRoom')
+
+let CrAttender =  sequelize.define('crAttender', {
     chatRoomId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
-        unique:'crUser'
+        unique:'crUser',
+        references: {
+            model: ChatRoom,
+            key:   "id"
+        }
     },
     userId: {
         type: Sequelize.INTEGER(11),
@@ -40,3 +46,7 @@ module.exports =  sequelize.define('crAttender', {
     tableName: 'crAttenders',
 });
 
+module.exports = CrAttender
+
+ChatRoom.hasMany(CrAttender)
+CrAttender.belongsTo(ChatRoom)

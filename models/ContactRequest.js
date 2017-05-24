@@ -3,10 +3,15 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('contactRequest', {
+const User = require('./User')
+let ContactRequest = sequelize.define('contactRequest', {
     userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
+        references: {
+            model: User,
+            key:   "id"
+        }
     },
     contactUserId: {
         type: Sequelize.INTEGER(11),
@@ -30,3 +35,7 @@ module.exports =  sequelize.define('contactRequest', {
     tableName: 'contactRequests',
 });
 
+module.exports = ContactRequest
+
+User.hasMany(ContactRequest)
+ContactRequest.belongsTo(User)

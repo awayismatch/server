@@ -118,6 +118,14 @@ function registerRoutes(router){
     router.put('/users/:uid/blocks',function*(next){
 
     })
+
+    /**
+     * 反馈：
+     * post:添加反馈内容
+     */
+    router.post('/users/:uid/feedBacks',function*(next){
+
+    })
 }
 
 
