@@ -3,10 +3,15 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('crDisplayItem', {
+const ChatRoom = require('./ChatRoom')
+let CrDisplayItem = sequelize.define('crDisplayItem', {
     chatRoomId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
+        references: {
+            model: ChatRoom,
+            key:   "id"
+        }
     },
     priority: {
         type: Sequelize.INTEGER(11).UNSIGNED,
@@ -18,4 +23,7 @@ module.exports =  sequelize.define('crDisplayItem', {
     freezeTableName: true,
     tableName: 'crDisplayItems',
 });
+module.exports = CrDisplayItem
 
+ChatRoom.hasOne(CrDisplayItem)
+CrDisplayItem.belongsTo(ChatRoom)

@@ -4,8 +4,10 @@
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
 const ChatRoom = require('./ChatRoom')
+const User = require('./User')
+const Profile = require('./Profile')
 
-let CrAttender =  sequelize.define('crAttender', {
+let CrAttendance =  sequelize.define('crAttendance', {
     chatRoomId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
@@ -18,7 +20,11 @@ let CrAttender =  sequelize.define('crAttender', {
     userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
-        unique:'crUser'
+        unique:'crUser',
+        references: {
+            model: User,
+            key:   "id"
+        }
     },
     status: {
         type: Sequelize.ENUM('attend','quit'),
@@ -43,10 +49,12 @@ let CrAttender =  sequelize.define('crAttender', {
     },
 }, {
     freezeTableName: true,
-    tableName: 'crAttenders',
+    tableName: 'crAttendances',
 });
 
-module.exports = CrAttender
+module.exports = CrAttendance
 
-ChatRoom.hasMany(CrAttender)
-CrAttender.belongsTo(ChatRoom)
+ChatRoom.hasMany(CrAttendance)
+CrAttendance.belongsTo(ChatRoom)
+User.hasMany(CrAttendance)
+CrAttendance.belongsTo(User)

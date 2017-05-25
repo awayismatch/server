@@ -3,11 +3,16 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('profile', {
+const User = require('./User')
+let Profile =  sequelize.define('profile', {
     userId: {
         type: Sequelize.INTEGER(11),
         unique:true,
         allowNull:false,
+        references: {
+            model: User,
+            key:   "id"
+        }
     },
     avatar: {
         type: Sequelize.STRING(255),
@@ -41,4 +46,8 @@ module.exports =  sequelize.define('profile', {
     freezeTableName: true,
     tableName: 'profiles',
 });
+
+module.exports = Profile
+Profile.belongsTo(User)
+User.hasOne(Profile)
 

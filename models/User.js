@@ -3,14 +3,8 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-const Contact = require('./Contact')
-const ContactRequest = require('./ContactRequest')
-const Profile = require('./Profile')
-const Profile = require('./Report')
-const Profile = require('./FeedBack')
-const Profile = require('./BlockedUser')
-const Profile = require('./CrBrowseHistory')
-module.exports =  sequelize.define('user', {
+
+let User = sequelize.define('user', {
     phone: {
         type: Sequelize.STRING(20),
         unique:true,
@@ -24,4 +18,6 @@ module.exports =  sequelize.define('user', {
     freezeTableName: true,
     tableName: 'users',
 });
+
+module.exports = User
 

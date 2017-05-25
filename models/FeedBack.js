@@ -3,10 +3,15 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('feedBack', {
+const User = require('./User')
+let FeedBack =  sequelize.define('feedBack', {
     userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
+        references: {
+            model: User,
+            key:   "id"
+        }
     },
     content: {
         type: Sequelize.STRING(255),
@@ -16,4 +21,6 @@ module.exports =  sequelize.define('feedBack', {
     freezeTableName: true,
     tableName: 'feedBacks',
 });
-
+module.exports = FeedBack
+User.hasMany(FeedBack)
+FeedBack.belongsTo(User)

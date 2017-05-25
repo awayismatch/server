@@ -6,8 +6,36 @@ const sequelize = require('../models/sequelize')
 const User = require('../models/User')
 const Profile = require('../models/Profile')
 const ChatRoom = require('../models/ChatRoom')
-const CrAttender = require('../models/CrAttender')
+const CrAttendance = require('../models/CrAttendance')
 const ContactRequest = require('../models/ContactRequest')
+const CrBrowseHistory = require('../models/CrBrowseHistory')
+const CrBlockedAttenders = require('../models/CrBlockedAttenders')
+const CrDisplayItem = require('../models/CrDisplayItem')
+const CrMessage = require('../models/CrMessage')
+const FeedBack = require('../models/FeedBack')
+const PasswordResetCode = require('../models/PasswordResetCode')
+const BlockedUser = require('../models/BlockedUser')
+const Contact = require('../models/Contact')
+const Report = require('../models/Report')
+
+
+module.exports.sync = async function(){
+    let force  = process.argv[3] || false
+    await User.sync({force})
+    await Profile.sync({force})
+    await ChatRoom.sync({force})
+    await CrAttendance.sync({force})
+    await ContactRequest.sync({force})
+    await CrBrowseHistory.sync({force})
+    await CrBlockedAttenders.sync({force})
+    await CrDisplayItem.sync({force})
+    await CrMessage.sync({force})
+    await FeedBack.sync({force})
+    await PasswordResetCode.sync({force})
+    await BlockedUser.sync({force})
+    await Contact.sync({force})
+    await Report.sync({force})
+}
 
 module.exports.addUser = async function(){
     let phone = process.argv[3]

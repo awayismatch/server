@@ -3,10 +3,15 @@
  */
 const sequelize = require('./sequelize')
 const Sequelize = require('sequelize')
-module.exports =  sequelize.define('chatRoom', {
+const User = require('./User')
+let ChatRoom = sequelize.define('chatRoom', {
     userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
+        references: {
+            model: User,
+            key:   "id"
+        }
     },
     topic: {
         type: Sequelize.STRING(60),
@@ -23,13 +28,11 @@ module.exports =  sequelize.define('chatRoom', {
     },
     femaleAmount: {
         type: Sequelize.INTEGER.UNSIGNED,
-        allowNull:false,
-        defaultValue:0
+        allowNull:true,
     },
     maleAmount: {
         type: Sequelize.INTEGER.UNSIGNED,
-        allowNull:false,
-        defaultValue:0
+        allowNull:true,
     },
     roomType: {
         type: Sequelize.ENUM('public','private','friend'),
@@ -41,3 +44,6 @@ module.exports =  sequelize.define('chatRoom', {
     tableName: 'chatRooms',
 });
 
+module.exports = ChatRoom
+User.hasMany(ChatRoom)
+ChatRoom.belongsTo(User)
