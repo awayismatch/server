@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ws</title>
+</head>
+<body>
+<ul id="display">
+    
+</ul>
+<input type="text" placeholder="输入用户id" id="user"><button id="connect">链接</button>
+<input type="text" id="text"><button id="send">发送</button>
+<script>
+    var user = document.getElementById('user')
+    var connect = document.getElementById('connect')
+    var text = document.getElementById('text')
+    var send = document.getElementById('send')
+    var display = document.getElementById('display')
+    var ws
+    var message = {
+        action:'',
+    }
+    var userId
+    connect.addEventListener('click',function(){
+        userId = user.value
+        if(ws)ws.close()
+        ws = new WebSocket('ws://localhost:3333')
+        ws.onopen = function(){
+            message.action = 'login'
+            message.userId = userId
+            ws.send(s(message))
+        }
+        ws.onerror = function(){
+            console.log('error')
+        }
+        ws.onclose = function(){
+            console.log('close')
+        }
+        ws.onmessage = function(msg){
+            var data = msg.data
+            var li = document.createElement('li')
+            li.innerHTML = data
+            display.appendChild(li)
+        }
+    })
+
+    send.addEventListener('click',function(){
+        var msg = text.value
+        message.action = 'send'
+        message.message = msg
+        message.userId = userId
+        ws.send(s(message))
+    })
+
+    function s(obj){
+        return JSON.stringify(obj)
+    }
+
+</script>
+</body>
+</html>

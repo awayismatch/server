@@ -12,7 +12,9 @@ const uuid = require('uuid')
 const convert = require('koa-convert')
 
 function registerRoutes(router){
-
+    router.get('/ws',async function(){
+        this.body = await render('ws')
+    })
 }
 
 module.exports = function(app){
