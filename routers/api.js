@@ -80,11 +80,11 @@ function registerRoutes(router){
 
 
     //@websocekt
-    router.put('/chatRooms/:crId/users',function*(next){
+    router.put('/chatRooms/:crId/attendance',function*(next){
 
     })
     //@websocekt
-    router.patch('/chatRooms/:crId/users/:uid',function*(next){
+    router.patch('/chatRooms/:crId/attendance/:uid',function*(next){
 
     })
 

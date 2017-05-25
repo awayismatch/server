@@ -7,14 +7,17 @@ module.exports =  sequelize.define('crBlockedAttender', {
     chatRoomId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
+        unique:'block'
     },
     userId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
+        unique:'block'
     },
     blockedUserId: {
         type: Sequelize.INTEGER(11),
         allowNull:false,
+        unique:'block'
     },
     block: {
         type: Sequelize.ENUM('open','close'),
