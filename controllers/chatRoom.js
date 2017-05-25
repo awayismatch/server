@@ -35,13 +35,26 @@ module.exports.getChatRoomUsers = async function(next){
 
 
 module.exports.getChatRooms = async function(next){
+    let {offset,limit} = this.query
+    offset = parseInt(offset) ||0
+    limit = parseInt(limit) || 20
     let res = {}
-    res.result = await CrDisplayItem.findAll({
-        attributes:['chatRoomId'],
-        include:{
-            model:ChatRoom,
-            attributes:{exclude:['id','userId','updatedAt']}
-        }
+    let chatRooms =  await ChatRoom.findAll({
+        attributes:{exclude:['userId','updatedAt']},
+        order:[
+            ['id','desc']
+        ],
+        where:{roomType:'public'},
+        offset,
+        limit
     })
+    if(chatRooms.length < limit){
+        res.nextOffset = null
+    }else{
+        res.nextOffset = offset + limit
+    }
+    res.offset = offset
+    res.limit = limit
+    res.result = chatRooms
     this.body = res
 }
