@@ -7,7 +7,7 @@ const CrMessage = require('../../models/CrMessage')
 module.exports = ChatRoom
 function ChatRoom(crId){
     this.id = crId
-    this.userDic = {}
+this.userDic = {}
 }
 /**
  * 使一个用户加入聊天室
@@ -41,7 +41,7 @@ ChatRoom.prototype.addUser = async function(user,check){
                     ['id','desc']
                 ]
             })
-            let crMessageId = lastMessage?lastMessage[id]:0
+            let crMessageId = lastMessage?lastMessage.id:0
             await CrMessageCursor.insertOrUpdate({
                 chatRoomId,
                 userId,
