@@ -71,12 +71,13 @@ ChatRoom.prototype.addUser = async function(user,check){
             }
         },
         order:[
-            ['id','desc'],
+            ['id','asc'],
         ],
         limit:100
     })
-    if(messages.length>0){
-        let res = {action:'bulkSend',messages:messages,chatRoomId,largestId:messages[0].id}
+    for(let message of messages){
+        let {userId,id,text,createdAt} = message
+        let res = {action:'send',messageId:id,chatRoomId,userId,text,createdAt}
         user.ws.send(JSON.stringify(res))
     }
     user.chatRoomDic[chatRoomId].isReady = true

@@ -64,6 +64,9 @@ async function _handleMessage(message){
     try{
         for(let fn of this.middlewares){
             if(fn.config){
+
+
+
                 let exclude = fn.config.exclude
                 if(exclude && ~exclude.indexOf(action))continue
             }
