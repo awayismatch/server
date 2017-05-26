@@ -1,20 +1,21 @@
 
 
-let system = require('../System')
+let system = require('./singleSystem')
 let CrMessageCursor = require('../../models/CrMessageCursor')
 let CrMessage = require('../../models/CrMessage')
 
 module.exports.login = async function(message){
     let {userId} = message
     this.userId = userId
-    await system.addUser(userId,this.ws)
+    await system.loginUser(userId,this.ws)
     return 'login ok'
 }
 
 module.exports.send = async function(message){
     let {chatRoomId} = message
     let chatRoom = system.getChatRoom(chatRoomId)
-    if(!chatRoom.getUser(this.userId)){
+    let user = chatRoom.getUser(this.userId)
+    if(!user){
         throw 'you are no in this chat room'
     }
     let created = await CrMessage.create({
@@ -22,35 +23,25 @@ module.exports.send = async function(message){
         userId:this.userId,
         text:message.text
     })
-    message.messageId = created.id
+    let messageId = created.id
+    message.messageId = messageId
     message.userId = created.userId
     message.createdAt = created.createdAt
-    chatRoom.broadcast(this.userId,JSON.stringify(message))
+    //自己发的消息，需要在创建之后就体现在cursor里面
+    user.setMessageCursor(chatRoomId,messageId)
+    await user.sendToChatRoom(chatRoom,JSON.stringify(message))
 }
 
 module.exports.attend = async function(message){
     let {chatRoomId} = message
-    await system.addChatRoom(this.userId,chatRoomId,true)
+    let chatRoom = await system.openChatRoom(chatRoomId)
+    if(!chatRoom)throw 'chat room '+chatRoomId+' not exists'
+    let user = system.getUser(this.userId)
+    await user.enterChatRoom(chatRoom,true)
 }
 
 module.exports.msgRes = async function(message){
     let {messageId,chatRoomId} = message
-    await CrMessageCursor.insertOrUpdate({
-        chatRoomId,
-        userId:this.userId,
-        crMessageId:messageId
-    },{
-        where:{chatRoomId,userId:this.userId}
-    })
-}
-
-module.exports.bulkRes = async function(message){
-    let {chatRoomId,largestId} = message
-    await CrMessageCursor.insertOrUpdate({
-        chatRoomId,
-        userId:this.userId,
-        crMessageId:largestId
-    },{
-        where:{chatRoomId,userId:this.userId}
-    })
+    let user = system.getUser(this.userId)
+    user.setMessageCursor(chatRoomId,messageId)
 }

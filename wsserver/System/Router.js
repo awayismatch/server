@@ -1,17 +1,19 @@
 /**
  * Created by John on 2017/5/25.
  */
-module.exports = Handler
-function Handler(ws){
-    if(!(this instanceof Handler)){
-        return new Handler(ws)
+const system = require('./singleSystem')
+const CrMessageCursor = require('../../models/CrMessageCursor')
+module.exports = Router
+function Router(ws){
+    if(!(this instanceof Router)){
+        return new Router(ws)
     }
     this.ws = ws
     this.handlerDic = {}
 
-    this.state = {}
     this.middlewares = []
     this.handleMessage = this.handleMessage.bind(this)
+    this.handleClose = this.handleClose.bind(this)
 }
 /**
  * 支持两种方式
@@ -21,7 +23,7 @@ function Handler(ws){
  * @param action
  * @param fn
  */
-Handler.prototype.use = function(action,fn){
+Router.prototype.use = function(action,fn){
     if('function' === typeof action){
         let config = fn
         fn = action
@@ -34,9 +36,9 @@ Handler.prototype.use = function(action,fn){
     }
 }
 
-Handler.prototype.handleMessage = function(message){
+Router.prototype.handleMessage = function(message){
     let ws = this.ws
-    _handleMessage.bind(this)(message).then((res)=>{
+    _handleMessage.call(this,message).then((res)=>{
         let result = {status:'ok',result:res}
         ws.send(s(result))
     }).catch((err)=>{
@@ -45,12 +47,17 @@ Handler.prototype.handleMessage = function(message){
         ws.send(s(res))
     })
 }
+Router.prototype.handleClose = function(){
+    _handleClose.call(this).then().catch()
+}
+
 async function _handleMessage(message){
 
     try{
         var msgObj = JSON.parse(message)
 
     }catch(err){
+        console.log(err,message)
         throw 'message should be an object'
     }
     let action = msgObj.action
@@ -77,6 +84,24 @@ async function _handleMessage(message){
         throw err
     }
 
+}
+
+async function _handleClose(){
+    let userId = this.userId
+    let user = system.getUser(userId)
+    let t = system.logoutUser(userId)
+    console.log('t',t)
+    let cursors = user.getAllMessageCursors()
+    for(let chatRoomId of Object.getOwnPropertyNames(cursors)){
+        let messageId = cursors[chatRoomId]
+        await CrMessageCursor.insertOrUpdate({
+            chatRoomId,
+            userId:this.userId,
+            crMessageId:messageId
+        },{
+            where:{chatRoomId,userId}
+        })
+    }
 }
 function s(obj){
     return JSON.stringify(obj)

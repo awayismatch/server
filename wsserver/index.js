@@ -1,28 +1,17 @@
 const WebSocket = require('ws');
-const Handler = require('./Handler')
+const Router = require('./System/Router')
 const wss = new WebSocket.Server({ port: 3333 });
-const messageController = require('./controllers/message')
+const controller = require('./System/controller')
+const middleware = require('./System/middleware')
 
-const system = require('./System')
 wss.on('connection', function connection(ws) {
-    let handler = new Handler(ws)
-    handler.use(async function checkLogin(){
-        let systemUser = system.userDic[this.userId]
-        if(systemUser &&systemUser.isLogin())return 'ok'
-        throw 'unAuthorize'
-    },{exclude:['login']})
+    let router = new Router(ws)
+    router.use(middleware.checkLogin,{exclude:['login']})
 
-    handler.use('login',messageController.login)
-    handler.use('send',messageController.send)
-    handler.use('attend',messageController.attend)
-    handler.use('msgRes',messageController.msgRes)
-    handler.use('bulkRes',messageController.bulkRes)
-    ws.on('message', handler.handleMessage);
-
-    ws.on('close',onclose.bind(handler))
-    function onclose(){
-        console.log(system,system.userDic)
-        system.removeUser(this.userId)
-    }
-
+    router.use('login',controller.login)
+    router.use('send',controller.send)
+    router.use('attend',controller.attend)
+    router.use('msgRes',controller.msgRes)
+    ws.on('message', router.handleMessage);
+    ws.on('close',router.handleClose)
 });

@@ -3,43 +3,78 @@
  */
 const User = require('./User')
 const ChatRoom = require('./ChatRoom')
-const CrAttendanceModel = require('../../models/CrAttendance')
+const ChatRoomModal = require('../../models/ChatRoom')
+const CrBlockedAttender = require('../../models/CrBlockedAttender')
+const CrAttendance = require('../../models/CrAttendance')
+
+const CrMessageCursor = require('../../models/CrMessageCursor')
 module.exports = System
 function System(){
     this.chatRoomDic = {}
     this.userDic = {}
 }
 
-System.prototype.addChatRoom = async function(userId,chatRoomId,check){
-    if(!this.userDic[userId])throw 'plz login user first!'
+//更改methods
+System.prototype.openChatRoom = async function(chatRoomId){
     if(!this.chatRoomDic[chatRoomId]){
-        this.chatRoomDic[chatRoomId] = new ChatRoom(chatRoomId)
+       let exists = await ChatRoomModal.findOne({
+           where:{id:chatRoomId}
+       })
+        if(exists){
+           this.chatRoomDic[chatRoomId] = new ChatRoom(chatRoomId)
+        }
     }
-    await this.chatRoomDic[chatRoomId].addUser(this.userDic[userId],check)
+    return this.chatRoomDic[chatRoomId]
 }
-
-System.prototype.addUser = async function(userId,ws){
-    if (!this.userDic[userId]) {
-        let user = this.userDic[userId] = new User(userId, ws)
-        await user.init()
-    } else {
-        this.userDic[userId].setWs(ws)
+System.prototype.loginUser = async function(userId,ws){
+    let existUser = this.userDic[userId]
+    if(existUser){
+        existUser.setWebSocket(ws)
+        existUser.enableUser()
+    }else{
+        this.userDic[userId] = new User(userId,ws)
     }
-    this.userDic[userId].login()
-    let attendances = await CrAttendanceModel.findAll({where:{userId,status:'attend'}})
+    let user = this.userDic[userId]
+    let blocks = await CrBlockedAttender.findAll({where:{
+        userId,
+        block:'open'
+    }})
+    for(let block of blocks){
+        await user.blockUser(block.chatRoomId,block.blockedUserId)
+    }
+    let attendances = await CrAttendance.findAll({
+        where: {userId,status:'attend'},
+        order:[
+            ['id','desc']
+        ]
+    })
     for(let attendance of attendances){
-       await this.addChatRoom(userId,attendance.chatRoomId)
+        let chatRoomId = attendance.chatRoomId
+        let chatRoom = await this.openChatRoom(chatRoomId)
+        let cursor = await CrMessageCursor.findOne({
+            where:{chatRoomId,userId}
+        })
+        let messageId = cursor?cursor.crMessageId:0
+        user.setMessageCursor(chatRoomId,messageId)
+        await user.enterChatRoom(chatRoom)
     }
+
+    return user
 }
 
-System.prototype.removeUser = function(userId){
-    this.userDic[userId]&&this.userDic[userId].logout()
-
+System.prototype.logoutUser = function(userId){
+    let existUser = this.userDic[userId]
+    console.log('logout',userId,existUser)
+    if(existUser){
+        existUser.disableUser()
+    }
+    return existUser
 }
 
 System.prototype.getUser = function(userId){
-    if(this.userDic[userId] && this.userDic[userId].isLogin())
-    return this.userDic[userId]
+    let existUser = this.userDic[userId]
+    if(existUser && existUser.isUsable())return existUser
+
     return false
 }
 
