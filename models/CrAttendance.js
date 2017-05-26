@@ -41,12 +41,6 @@ let CrAttendance =  sequelize.define('crAttendance', {
         allowNull:false,
         defaultValue:'close'
     },
-    //用于记录最后一接收到的一条消息id.
-    latestMessageId: {
-        type: Sequelize.INTEGER(11),
-        allowNull:false,
-        defaultValue:0,
-    },
 }, {
     freezeTableName: true,
     tableName: 'crAttendances',

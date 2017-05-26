@@ -12,13 +12,18 @@
     
 </ul>
 <input type="text" placeholder="输入用户id" id="user"><button id="connect">链接</button>
-<input type="text" id="text"><button id="send">发送</button>
+<span>chatRoomId</span><input type="text" id="chatRoomId"><span>message</span><input type="text" id="text"><button id="send">发送</button>
+
+<div style="height:2px;width:100%;"></div>
+<button id="attend">加入聊天室</button>
 <script>
     var user = document.getElementById('user')
     var connect = document.getElementById('connect')
     var text = document.getElementById('text')
+    var crId = document.getElementById('chatRoomId')
     var send = document.getElementById('send')
     var display = document.getElementById('display')
+    var attend = document.getElementById('attend')
     var ws
     var message = {
         action:'',
@@ -44,17 +49,44 @@
             var li = document.createElement('li')
             li.innerHTML = data
             display.appendChild(li)
+            try{
+                var msgObj = JSON.parse(data)
+
+                if(msgObj.action ){
+                    switch (msgObj.action){
+                        case 'send':
+                            var res = {action:'msgRes',chatRoomId:msgObj.chatRoomId,messageId:msgObj.messageId}
+                            break
+                        case 'bulkSend':
+                            res = {action:'bulkRes',chatRoomId:msgObj.chatRoomId,largestId:msgObj.largestId}
+                            break
+                    }
+
+                    console.log('here')
+                    ws.send(s(res))
+                }
+            }catch (err){
+                console.log(err)
+            }
+
         }
     })
 
     send.addEventListener('click',function(){
         var msg = text.value
+        var chatRoomId = crId.value
         message.action = 'send'
-        message.message = msg
-        message.userId = userId
+        message.text = msg
+        message.chatRoomId = chatRoomId
         ws.send(s(message))
     })
+    attend.addEventListener('click',function(){
 
+        var chatRoomId = crId.value
+        message.action = 'attend'
+        message.chatRoomId = chatRoomId
+        ws.send(s(message))
+    })
     function s(obj){
         return JSON.stringify(obj)
     }

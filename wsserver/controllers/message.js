@@ -1,22 +1,56 @@
-/**
- * Created by John on 2017/5/25.
- */
-const redis = require('redis')
-// const client = redis.createClient()
-const bluebird = require('bluebird')
-bluebird.promisifyAll(redis.RedisClient.prototype);
-bluebird.promisifyAll(redis.Multi.prototype);
+
+
+let system = require('../System')
+let CrMessageCursor = require('../../models/CrMessageCursor')
+let CrMessage = require('../../models/CrMessage')
+
 module.exports.login = async function(message){
     let {userId} = message
-    // await client.setAsync('user'+userId,true)
-    this.state.userId = userId
-    return 'ok'
+    this.userId = userId
+    await system.addUser(userId,this.ws)
+    return 'login ok'
 }
+
 module.exports.send = async function(message){
-    let userId = this.state.userId
-    return userId
+    let {chatRoomId} = message
+    let chatRoom = system.getChatRoom(chatRoomId)
+    if(!chatRoom.getUser(this.userId)){
+        throw 'you are no in this chat room'
+    }
+    let created = await CrMessage.create({
+        chatRoomId,
+        userId:this.userId,
+        text:message.text
+    })
+    message.messageId = created.id
+    message.userId = created.userId
+    message.createdAt = created.createdAt
+    chatRoom.broadcast(this.userId,JSON.stringify(message))
 }
 
-module.exports.operation = async function(message){
+module.exports.attend = async function(message){
+    let {chatRoomId} = message
+    await system.addChatRoom(this.userId,chatRoomId,true)
+}
 
+module.exports.msgRes = async function(message){
+    let {messageId,chatRoomId} = message
+    await CrMessageCursor.insertOrUpdate({
+        chatRoomId,
+        userId:this.userId,
+        crMessageId:messageId
+    },{
+        where:{chatRoomId,userId:this.userId}
+    })
+}
+
+module.exports.bulkRes = async function(message){
+    let {chatRoomId,largestId} = message
+    await CrMessageCursor.insertOrUpdate({
+        chatRoomId,
+        userId:this.userId,
+        crMessageId:largestId
+    },{
+        where:{chatRoomId,userId:this.userId}
+    })
 }
