@@ -6,34 +6,58 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>ws</title>
+    <style>
+        html{
+            font-size: 15px;
+        }
+        p{
+            margin:0;
+            padding-top:10px;
+        }
+        input{
+
+        }
+    </style>
 </head>
 <body>
-<ul id="display">
+<ul id="display" style="height:200px;width:800px;overflow-x:hidden;overflow-y:auto;">
     
 </ul>
+<p>用户</p>
 <input type="text" placeholder="输入用户id" id="user"><button id="connect">链接</button>
-<span>chatRoomId</span><input type="text" id="chatRoomId"><span>message</span><input type="text" id="text"><button id="send">发送</button>
+<p>聊天室id</p>
+<input type="text" id="chatRoomId"><button id="attend">加入聊天室</button><button id="quit">退出聊天室</button>
+<p>消息</p>
+<input type="text" id="text"><button id="send">发送</button>
+<p>屏蔽用户id</p>
+<input type="text" id="blockId"><button id="block">屏蔽</button><button id="unblock">解除屏蔽</button>
 
-<div style="height:2px;width:100%;"></div>
-<button id="attend">加入聊天室</button>
 <script>
     var user = document.getElementById('user')
     var connect = document.getElementById('connect')
     var text = document.getElementById('text')
     var crId = document.getElementById('chatRoomId')
-    var send = document.getElementById('send')
+    var blockedUserId = document.getElementById('blockId')
+
     var display = document.getElementById('display')
+
+    var send = document.getElementById('send')
+
     var attend = document.getElementById('attend')
+    var quit = document.getElementById('quit')
+
+    var block = document.getElementById('block')
+    var unblock = document.getElementById('unblock')
     var ws
-    var message = {
-        action:'',
-    }
+
     var userId
     connect.addEventListener('click',function(){
         userId = user.value
         if(ws)ws.close()
         ws = new WebSocket('ws://localhost:3333')
         ws.onopen = function(){
+            var message = {
+            }
             message.action = 'login'
             message.userId = userId
             ws.send(s(message))
@@ -48,7 +72,7 @@
             var data = msg.data
             var li = document.createElement('li')
             li.innerHTML = data
-            display.appendChild(li)
+            display.insertBefore(li,display.firstChild)
             try{
                 var msgObj = JSON.parse(data)
 
@@ -75,6 +99,8 @@
     send.addEventListener('click',function(){
         var msg = text.value
         var chatRoomId = crId.value
+        var message = {
+        }
         message.action = 'send'
         message.text = msg
         message.chatRoomId = chatRoomId
@@ -83,7 +109,41 @@
     attend.addEventListener('click',function(){
 
         var chatRoomId = crId.value
+        var message = {
+        }
         message.action = 'attend'
+        message.chatRoomId = chatRoomId
+        ws.send(s(message))
+    })
+    quit.addEventListener('click',function(){
+
+        var chatRoomId = crId.value
+        var message = {
+        }
+        message.action = 'quit'
+        message.chatRoomId = chatRoomId
+        ws.send(s(message))
+    })
+
+    block.addEventListener('click',function(){
+
+        var chatRoomId = crId.value
+        var userId = blockedUserId.value
+        var message = {
+        }
+        message.action = 'block'
+        message.userId = userId
+        message.chatRoomId = chatRoomId
+        ws.send(s(message))
+    })
+    unblock.addEventListener('click',function(){
+
+        var chatRoomId = crId.value
+        var userId = blockedUserId.value
+        var message = {
+        }
+        message.action = 'unblock'
+        message.userId = userId
         message.chatRoomId = chatRoomId
         ws.send(s(message))
     })

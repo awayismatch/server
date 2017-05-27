@@ -20,3 +20,6 @@ ChatRoom.prototype.getUser = function(userId){
 ChatRoom.prototype.addUser = function(user){
     return this.userDic[user.id] = user
 }
+ChatRoom.prototype.removeUser = function(user){
+    delete this.userDic[user.id]
+}

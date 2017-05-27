@@ -41,7 +41,26 @@ module.exports.attend = async function(message){
     await user.enterChatRoom(chatRoom,true)
     return {status:'ok',chatRoomId,resFor:'attend'}
 }
-
+module.exports.quit = async function(message){
+    let {chatRoomId} = message
+    let chatRoom = await system.getChatRoom(chatRoomId)
+    if(!chatRoom)throw 'chat room '+chatRoomId+' not exists'
+    let user = system.getUser(this.userId)
+    await user.leaveChatRoom(chatRoom)
+    return {status:'ok',chatRoomId,resFor:'quit'}
+}
+module.exports.block = async function(message){
+    let {userId,chatRoomId} = message
+    let user = system.getUser(this.userId)
+    await user.blockUser(chatRoomId,userId,true)
+    return {status:'ok',chatRoomId,userId,resFor:'block'}
+}
+module.exports.unblock = async function(message){
+    let {userId,chatRoomId} = message
+    let user = system.getUser(this.userId)
+    await user.unblockUser(chatRoomId,userId,true)
+    return {status:'ok',chatRoomId,userId,resFor:'unblock'}
+}
 module.exports.msgRes = async function(message){
     let {messageId,chatRoomId} = message
     let user = system.getUser(this.userId)

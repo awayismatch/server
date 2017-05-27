@@ -10,7 +10,13 @@ wss.on('connection', function connection(ws) {
 
     router.use('login',controller.login)
     router.use('send',controller.send)
+
+    router.use('block',controller.block)
+    router.use('unblock',controller.unblock)
+
     router.use('attend',controller.attend)
+    router.use('quit',controller.quit)
+
     router.use('msgRes',controller.msgRes)
     ws.on('message', router.handleMessage);
     ws.on('close',router.handleClose)

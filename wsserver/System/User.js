@@ -84,18 +84,21 @@ User.prototype.enterChatRoom = async function(chatRoom,persist = false){
         this.ws.send(JSON.stringify(res))
     }
 }
+User.prototype.leaveChatRoom = async function(chatRoom){
+
+    let chatRoomId = chatRoom.id
+    let userId = this.id
+    chatRoom.removeUser(this)
+    await CrAttendance.update({
+        status:"quit",
+    },{where:{chatRoomId,userId}})
+}
 User.prototype.setMessageCursor = function(chatRoomId,messageId){
     this.messageCursorDic[chatRoomId] = messageId
 }
 
 User.prototype.getMessageCursor = function(chatRoomId){
     return this.messageCursorDic[chatRoomId] || 0
-}
-
-
-User.prototype.leaveChatRoom = async function(chatRoom){
-    //在这里从数据库获取并初始化屏蔽列表
-
 }
 
 User.prototype.setWebSocket = function(ws){
@@ -121,46 +124,51 @@ User.prototype.sendToChatRoom = async function(chatRoom,message){
     let userDic = chatRoom.getAllUsers()
     for(let key of Object.getOwnPropertyNames(userDic)){
         let user = userDic[key]
-        if(this.id === user.id)continue
-        console.log(user.isUsable(),user.enable)
-        user.isUsable()&&user.ws.send(message)
+        if(this.id === user.id)continue //消息不发给自己
+        user.isUsable()&&!user.doIBlock(chatRoom.id,this.id)&&user.ws.send(message)
     }
 }
 
 
-User.prototype.blockUser = async function(chatRoomId,blockedUserId){
+User.prototype.blockUser = async function(chatRoomId,blockedUserId,persist = false){
+    console.log(this.id,'block',blockedUserId)
     if(!this.blockDic[chatRoomId]){
-        this.blockDic[chatRoomId] = []
+        this.blockDic[chatRoomId] = {}
     }
-    this.blockDic[chatRoomId].push(blockedUserId)
-    await CrBlockedAttender.insertOrUpdate({
-        chatRoomId,
-        blockedUserId,
-        userId:this.id,
-        block:'open'
+    this.blockDic[chatRoomId][blockedUserId] = true
+    if(persist){
+        await CrBlockedAttender.insertOrUpdate({
+            chatRoomId,
+            blockedUserId,
+            userId:this.id,
+            block:'open'
+        })
+    }
 
-    })
 }
 
-User.prototype.unBlockUser = async function(chatRoomId,blockedUserId){
-    let list = this.blockDic[chatRoomId]
-    if(list){
-        let idx = list.indexOf(blockedUserId)
-        if(!~idx){
-            await CrBlockedAttender.update({
-                block:'close',
-            },{
-                where:{
-                    chatRoomId,
-                    blockedUserId,
-                    userId:this.id
-                }
-            })
-            list.splice(idx,1)
-        }
+User.prototype.unblockUser = async function(chatRoomId,blockedUserId,persist=false){
+    delete this.blockDic[chatRoomId][blockedUserId]
+    if(persist){
+        await CrBlockedAttender.update({
+            block:'close',
+        },{
+            where:{
+                chatRoomId,
+                blockedUserId,
+                userId:this.id
+            }
+        })
     }
+
+
 }
 
 User.prototype.getAllMessageCursors = function(){
     return this.messageCursorDic
 }
+User.prototype.doIBlock = function(chatRoomId,blockedUserId){
+    console.log('doidblock',this.blockDic[chatRoomId])
+    return this.blockDic[chatRoomId]&&this.blockDic[chatRoomId][blockedUserId]
+}
+
