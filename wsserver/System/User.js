@@ -168,7 +168,6 @@ User.prototype.getAllMessageCursors = function(){
     return this.messageCursorDic
 }
 User.prototype.doIBlock = function(chatRoomId,blockedUserId){
-    console.log('doidblock',this.blockDic[chatRoomId])
     return this.blockDic[chatRoomId]&&this.blockDic[chatRoomId][blockedUserId]
 }
 
