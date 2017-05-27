@@ -39,8 +39,7 @@ Router.prototype.use = function(action,fn){
 Router.prototype.handleMessage = function(message){
     let ws = this.ws
     _handleMessage.call(this,message).then((res)=>{
-        let result = {status:'ok',result:res}
-        ws.send(s(result))
+        res && ws.send(s(res))
     }).catch((err)=>{
         console.log('err',err)
         let res = {status:'error',msg:err}
@@ -71,9 +70,6 @@ async function _handleMessage(message){
     try{
         for(let fn of this.middlewares){
             if(fn.config){
-
-
-
                 let exclude = fn.config.exclude
                 if(exclude && ~exclude.indexOf(action))continue
             }
@@ -83,20 +79,18 @@ async function _handleMessage(message){
     }catch (err){
         throw err
     }
-
 }
 
 async function _handleClose(){
     let userId = this.userId
     let user = system.getUser(userId)
-    let t = system.logoutUser(userId)
-    console.log('t',t)
+    system.logoutUser(userId)
     let cursors = user.getAllMessageCursors()
     for(let chatRoomId of Object.getOwnPropertyNames(cursors)){
         let messageId = cursors[chatRoomId]
         await CrMessageCursor.insertOrUpdate({
             chatRoomId,
-            userId:this.userId,
+            userId,
             crMessageId:messageId
         },{
             where:{chatRoomId,userId}

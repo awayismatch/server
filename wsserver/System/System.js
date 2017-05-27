@@ -55,7 +55,9 @@ System.prototype.loginUser = async function(userId,ws){
             where:{chatRoomId,userId}
         })
         let messageId = cursor?cursor.crMessageId:0
-        user.setMessageCursor(chatRoomId,messageId)
+        let inMemoryMessageId = user.getMessageCursor(chatRoomId)
+        messageId>inMemoryMessageId && user.setMessageCursor(chatRoomId,messageId)
+
         await user.enterChatRoom(chatRoom)
     }
 
@@ -64,7 +66,6 @@ System.prototype.loginUser = async function(userId,ws){
 
 System.prototype.logoutUser = function(userId){
     let existUser = this.userDic[userId]
-    console.log('logout',userId,existUser)
     if(existUser){
         existUser.disableUser()
     }

@@ -4,6 +4,6 @@
 const system = require('./singleSystem')
 module.exports.checkLogin = async function(){
     let systemUser = system.getUser(this.userId)
-    if(systemUser &&systemUser.isUsable())return 'ok'
+    if(systemUser &&systemUser.isUsable())return false
     throw 'unAuthorize'
 }

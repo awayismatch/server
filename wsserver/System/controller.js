@@ -8,7 +8,7 @@ module.exports.login = async function(message){
     let {userId} = message
     this.userId = userId
     await system.loginUser(userId,this.ws)
-    return 'login ok'
+    return 'ok'
 }
 
 module.exports.send = async function(message){
@@ -30,6 +30,7 @@ module.exports.send = async function(message){
     //自己发的消息，需要在创建之后就体现在cursor里面
     user.setMessageCursor(chatRoomId,messageId)
     await user.sendToChatRoom(chatRoom,JSON.stringify(message))
+    return {status:'ok',messageId,resFor:'send'}
 }
 
 module.exports.attend = async function(message){
@@ -38,10 +39,12 @@ module.exports.attend = async function(message){
     if(!chatRoom)throw 'chat room '+chatRoomId+' not exists'
     let user = system.getUser(this.userId)
     await user.enterChatRoom(chatRoom,true)
+    return {status:'ok',chatRoomId,resFor:'attend'}
 }
 
 module.exports.msgRes = async function(message){
     let {messageId,chatRoomId} = message
     let user = system.getUser(this.userId)
     user.setMessageCursor(chatRoomId,messageId)
+    return false
 }

@@ -89,7 +89,7 @@ User.prototype.setMessageCursor = function(chatRoomId,messageId){
 }
 
 User.prototype.getMessageCursor = function(chatRoomId){
-    return this.messageCursorDic[chatRoomId]
+    return this.messageCursorDic[chatRoomId] || 0
 }
 
 
