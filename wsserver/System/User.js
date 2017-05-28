@@ -5,14 +5,18 @@ const CrBlockedAttender = require('../../models/CrBlockedAttender')
 const CrAttendance = require('../../models/CrAttendance')
 const CrMessage = require('../../models/CrMessage')
 const CrMessageCursor = require('../../models/CrMessageCursor')
+const sequelize = require('../../models/sequelize')
 module.exports = User
 function User(userId,ws){
     this.id = userId
     this.ws = ws
     this.blockDic = {}
-
-    this.messageCursorDic = {}
     this.enable = true
+
+    //when user is created( not ready), user will fetch message from database, while fetching,
+    //message receive from webSocket will be pushed to messageQueue
+    this.ready = false
+    this.messageQueue = []
 }
 
 //更改methods
@@ -36,36 +40,38 @@ User.prototype.enterChatRoom = async function(chatRoom,persist = false){
             }
         })
         if(!exists){
-            await CrAttendance.insertOrUpdate({
-                chatRoomId,
-                userId,
-                status:'attend'
-            })
-            let lastMessage = await CrMessage.findOne({
-                attributes:['id'],
-                where:{chatRoomId},
-                order:[
-                    ['id','desc']
-                ]
-            })
-            let crMessageId = lastMessage?lastMessage.id:0
-            await CrMessageCursor.insertOrUpdate({
-                chatRoomId,
-                userId,
-                crMessageId
-            })
-
+            let transaction = await sequelize.transaction()
+            try{
+                await CrAttendance.create({
+                    chatRoomId,
+                    userId,
+                    status:'attend'
+                },{transaction:transaction})
+                let lastMessage = await CrMessage.findOne({
+                    attributes:['id'],
+                    where:{chatRoomId},
+                    order:[
+                        ['id','desc']
+                    ]
+                })
+                let crMessageId = lastMessage?lastMessage.id:0
+                await CrMessageCursor.create({
+                    chatRoomId,
+                    userId,
+                    crMessageId
+                },{transaction:transaction})
+                await transaction.commit()
+            }catch (err){
+                await transaction.rollback()
+                throw err
+            }
         }
     }
-    let lastMessage = await CrMessageCursor.findOne({
-        attributes:['crMessageId'],
-        where:{chatRoomId,userId},
-        order:[
-            ['id','desc']
-        ]
-    })
-    let messageId = lastMessage?lastMessage.crMessageId:0
-    this.messageCursorDic[chatRoomId] = messageId
+    await this.flushDbMessages(chatRoomId)
+    this.setReady(true)
+}
+User.prototype.flushDbMessages = async function(chatRoomId){
+    let messageId = await this.getMessageCursor(chatRoomId)
     let notSentMessages = await CrMessage.findAll({
         attributes:['userId','id','text','createdAt'],
         where:{
@@ -93,12 +99,28 @@ User.prototype.leaveChatRoom = async function(chatRoom){
         status:"quit",
     },{where:{chatRoomId,userId}})
 }
-User.prototype.setMessageCursor = function(chatRoomId,messageId){
-    this.messageCursorDic[chatRoomId] = messageId
+User.prototype.setMessageCursor = async function(chatRoomId,messageId){
+
+    await CrMessageCursor.insertOrUpdate({
+        chatRoomId,
+        userId:this.id,
+        crMessageId:messageId
+    })
+
 }
 
-User.prototype.getMessageCursor = function(chatRoomId){
-    return this.messageCursorDic[chatRoomId] || 0
+User.prototype.getMessageCursor = async function(chatRoomId){
+    let cursor = await CrMessageCursor.findOne({
+        attributes:['crMessageId'],
+        where:{
+            chatRoomId,
+            userId:this.id,
+        },
+        order:[
+            ['id','desc']
+        ]
+    })
+    return cursor?cursor.crMessageId:0
 }
 
 User.prototype.setWebSocket = function(ws){
@@ -114,9 +136,19 @@ User.prototype.isUsable = function(){
     return this.enable
 }
 
-User.prototype.isInChatRoom = async function(chatRoom){
-    let user = chatRoom.getUser(this.userId)
-    return  user&&user.isUsable()
+User.prototype.setReady = function(isReady){
+    if(isReady){
+        while(this.messageQueue.length){
+            this.ws.send(this.messageQueue.shift())
+        }
+    }
+    this.ready = isReady
+}
+User.prototype.isReady = function(){
+    return this.ready
+}
+User.prototype.queueMessage = function(message){
+    return this.messageQueue.push(message)
 }
 
 User.prototype.sendToChatRoom = async function(chatRoom,message){
@@ -124,8 +156,12 @@ User.prototype.sendToChatRoom = async function(chatRoom,message){
     let userDic = chatRoom.getAllUsers()
     for(let key of Object.getOwnPropertyNames(userDic)){
         let user = userDic[key]
-        if(this.id === user.id)continue //消息不发给自己
-        user.isUsable()&&!user.doIBlock(chatRoom.id,this.id)&&user.ws.send(message)
+
+        if(this.id === user.id)continue
+        if(user.isUsable()&&!user.doIBlock(chatRoom.id,this.id)){
+            if(user.isReady())user.ws.send(message)
+            else user.queueMessage(message)
+        }
     }
 }
 
@@ -160,13 +196,9 @@ User.prototype.unblockUser = async function(chatRoomId,blockedUserId,persist=fal
             }
         })
     }
-
-
 }
 
-User.prototype.getAllMessageCursors = function(){
-    return this.messageCursorDic
-}
+
 User.prototype.doIBlock = function(chatRoomId,blockedUserId){
     return this.blockDic[chatRoomId]&&this.blockDic[chatRoomId][blockedUserId]
 }

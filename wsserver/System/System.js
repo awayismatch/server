@@ -55,6 +55,7 @@ System.prototype.loginUser = async function(userId,ws){
             where:{chatRoomId,userId}
         })
         let messageId = cursor?cursor.crMessageId:0
+        //由于messagecursor是在用户退出之后才保存到数据库，所以数据库里的可能不是最新的。
         let inMemoryMessageId = user.getMessageCursor(chatRoomId)
         messageId>inMemoryMessageId && user.setMessageCursor(chatRoomId,messageId)
 
@@ -68,6 +69,7 @@ System.prototype.logoutUser = function(userId){
     let existUser = this.userDic[userId]
     if(existUser){
         existUser.disableUser()
+        existUser.setReady(false)
     }
     return existUser
 }

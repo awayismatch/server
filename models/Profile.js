@@ -30,6 +30,7 @@ let Profile =  sequelize.define('profile', {
         type: Sequelize.STRING(255),
         allowNull:false,
     },
+
     birthday: {
         type: Sequelize.DATEONLY,
         allowNull:false,

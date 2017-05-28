@@ -82,20 +82,7 @@ async function _handleMessage(message){
 }
 
 async function _handleClose(){
-    let userId = this.userId
-    let user = system.getUser(userId)
-    system.logoutUser(userId)
-    let cursors = user.getAllMessageCursors()
-    for(let chatRoomId of Object.getOwnPropertyNames(cursors)){
-        let messageId = cursors[chatRoomId]
-        await CrMessageCursor.insertOrUpdate({
-            chatRoomId,
-            userId,
-            crMessageId:messageId
-        },{
-            where:{chatRoomId,userId}
-        })
-    }
+    system.logoutUser(this.userId)
 }
 function s(obj){
     return JSON.stringify(obj)

@@ -28,7 +28,8 @@ module.exports.send = async function(message){
     message.userId = created.userId
     message.createdAt = created.createdAt
     //自己发的消息，需要在创建之后就体现在cursor里面
-    user.setMessageCursor(chatRoomId,messageId)
+    await user.setMessageCursor(chatRoomId,messageId)
+    console.log(chatRoomId,messageId)
     await user.sendToChatRoom(chatRoom,JSON.stringify(message))
     return {status:'ok',messageId,resFor:'send'}
 }
@@ -64,6 +65,6 @@ module.exports.unblock = async function(message){
 module.exports.msgRes = async function(message){
     let {messageId,chatRoomId} = message
     let user = system.getUser(this.userId)
-    user.setMessageCursor(chatRoomId,messageId)
+    await user.setMessageCursor(chatRoomId,messageId)
     return false
 }
